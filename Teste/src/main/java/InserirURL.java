@@ -2,88 +2,73 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.swing.JOptionPane;
+
+import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
+import org.apache.poi.openxml4j.opc.OPCPackage;
+import org.apache.poi.xwpf.model.XWPFHeaderFooterPolicy;
 import org.apache.poi.xwpf.usermodel.ParagraphAlignment;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
+import org.apache.poi.xwpf.usermodel.XWPFFooter;
 import org.apache.poi.xwpf.usermodel.XWPFParagraph;
 import org.apache.poi.xwpf.usermodel.XWPFRun;
+import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTP;
+import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTR;
+import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTSectPr;
+import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTText;
 
 public class InserirURL {
 
 	public InserirURL() {}
 	
 	public static void main(String[] args) throws Exception {
-		
-		ArrayList<String> cont = new ArrayList<String>();
-		cont = new InserirURL().ler();
-		new InserirURL().inserir(cont);
+			
+		new InserirURL().rodape();
 
 	}
 	
-	public ArrayList<String> ler() {
+	public void rodape() {
 		
 		try {
 			
-			FileInputStream file = new FileInputStream("Doc.docx");
-			XWPFDocument doc = new XWPFDocument(file);
+			String doc =  "memorando.docx";
+			File docxFile = new File(doc);
 			
-			List<XWPFParagraph> paragraphList = doc.getParagraphs();
-			ArrayList<String> conteudo = new ArrayList<String>(); 
-			
-			for(XWPFParagraph paragraph : paragraphList) {
-				conteudo.add(paragraph.getText());
-			}
-			
-		/*	for(int i = 0 ; i < conteudo.size() ; i++) {
-				System.out.println(conteudo.get(i));
-			} */
-			
-			return conteudo;
-			
-		}catch(FileNotFoundException e) {
-			e.printStackTrace();
+			FileInputStream out = new FileInputStream(doc);
+			XWPFDocument docx = new XWPFDocument(out);
 		
-		}catch (Exception e) {
-				// TODO: handle exception
+			CTSectPr sectPr = docx.getDocument().getBody().addNewSectPr();
+			XWPFHeaderFooterPolicy policy = new XWPFHeaderFooterPolicy(docx,sectPr);
+		
+			CTP ctpFooter = CTP.Factory.newInstance();
+			CTR ctrFooter = ctpFooter.addNewR();
+		
+			CTText ctFooter = ctrFooter.addNewT();
+			String footerText = "Teste !!!";
+		
+			ctFooter.setStringValue(footerText);
+			XWPFParagraph footerParagraph = new XWPFParagraph(ctpFooter,docx);
+		
+			XWPFParagraph[] parsFooter = new XWPFParagraph[1];
+			parsFooter[0] = footerParagraph;
+		
+			policy.createFooter(XWPFHeaderFooterPolicy.DEFAULT,parsFooter);
+			FileOutputStream in = new FileOutputStream(docxFile);
+			
+			docx.write(in);
+			in.close();
+		
+			JOptionPane.showMessageDialog(null, "Arquivo Modificado Com sucesso");
+		
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 		
-		return null;
-	}
-	
-	public void inserir(ArrayList<String> conteudo) {
-		
-		try {
-			
-			FileOutputStream file = new FileOutputStream("Doc.docx");
-			XWPFDocument doc = new XWPFDocument();
-			
-			ArrayList<String> conteudo2 = conteudo;
-			
-			XWPFParagraph t1 = doc.createParagraph();
-			t1.setAlignment(ParagraphAlignment.BOTH);
-			
-			XWPFRun url = t1.createRun();
-			
-			for(int i = 0 ; i < conteudo2.size() ; i++) {
-				url.setText(conteudo2.get(i));	
-			}
-			
-			url.setText("https://www.google.com/");
-			
-			for(int i = 0 ; i < conteudo2.size() ; i++) {
-				System.out.println(conteudo2.get(i));
-			} 
-			
-			doc.write(file);
-			file.close();
-			doc.close();
-			
-		}catch(FileNotFoundException e) {
-			e.printStackTrace();
-		
-		}catch (Exception e) {}
 	}
 	
 }

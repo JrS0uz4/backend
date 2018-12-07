@@ -19,7 +19,7 @@ public static void main(String[] args) throws Exception {
 		
 		try {
 			
-			FileInputStream file = new FileInputStream("Doc.docx");
+			FileInputStream file = new FileInputStream("memorando.docx");
 			XWPFDocument doc = new XWPFDocument(file);
 			
 			List<XWPFParagraph> paragraphList = doc.getParagraphs();
